@@ -2,19 +2,19 @@
 // You can import this data from anywhere in your site by using the `import` keyword.
 
 // Site title and description
-export const SITE_LANG = "en";
-export const SITE_TAB = "Frosti";
-export const SITE_TITLE = "Frosti 🧊";
-export const SITE_DESCRIPTION = "A blog template";
+export const SITE_LANG = "zh";
+export const SITE_TAB = "__dragon_的小站";
+export const SITE_TITLE = "__dragon_的小站";
+export const SITE_DESCRIPTION = "__dragon_的小站";
 export const DATE_FORMAT = "ddd MMM DD YYYY";
 
 // User profile information
-export const USER_NAME = "EveSunMaple";
-export const USER_SITE = "https://frosti.saroprock.com"
+export const USER_NAME = "__dragon_";
+export const USER_SITE = "https://nahida.cfd"
 export const USER_AVATAR = "/profile.webp";
 
 // Server and transition settings
-export const SERVER_URL = "https://demo.saroprock.com";
+export const SERVER_URL = "https://nahida.cfd";
 
 // Theme settings
 export const DAISYUI_THEME = {
@@ -92,13 +92,13 @@ export const socialIcons = [
     svg: "support",
   },
   {
-    href: "https://github.com/EveSunMaple",
+    href: "https://github.com/ybz2010",
     ariaLabel: "Github",
     title: "Github",
     svg: "github",
   },
   {
-    href: "https://space.bilibili.com/438392347",
+    href: "https://space.bilibili.com/3493106422908956",
     ariaLabel: "BiliBili",
     title: "BiliBili",
     svg: "bilibili",
