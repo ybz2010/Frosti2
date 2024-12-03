@@ -11,7 +11,7 @@ export const DATE_FORMAT = "ddd MMM DD YYYY";
 // User profile information
 export const USER_NAME = "__dragon_";
 export const USER_SITE = "https://nahida.cfd"
-export const USER_AVATAR = "/profile.webp";
+export const USER_AVATAR = "/profile_1.webp";
 
 // Server and transition settings
 export const SERVER_URL = "https://nahida.cfd";
