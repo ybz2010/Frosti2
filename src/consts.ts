@@ -14,7 +14,7 @@ export const USER_SITE = "https://nahida.cfd"
 export const USER_AVATAR = "/profile_1.webp";
 
 // Server and transition settings
-export const SERVER_URL = "https://nahida.cfd";
+export const SERVER_URL = "https://sigewinne.us";
 
 // Theme settings
 export const DAISYUI_THEME = {
