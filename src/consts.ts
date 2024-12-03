@@ -10,7 +10,7 @@ export const DATE_FORMAT = "ddd MMM DD YYYY";
 
 // User profile information
 export const USER_NAME = "__dragon_";
-export const USER_SITE = "https://nahida.cfd"
+export const USER_SITE = "https://sigewinne.us"
 export const USER_AVATAR = "/profile_1.webp";
 
 // Server and transition settings
