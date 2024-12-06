@@ -38,7 +38,7 @@ signed main()
             if (i & (1 << (k - 1)))
                 for (int j = 1; j <= n; j++)
                     if (!(i & (1 << (j - 1))))
-                        dp[j][i | (1 << (j - 1))] = min(dp[j][i | (1 << (j - 1))],dp[k][i] + dis(k,j));
+                        dp[j][i | (1 << (j - 1))] = min(dp[j][i | (1 << (j - 1))],dp[k][i] + dis(k,j));//dp转移
     float ans = 1145141919810;
     for (int i = 1; i <= n; i++)
         ans = min(ans,dp[i][(1 << n) - 1]);
@@ -80,7 +80,7 @@ signed main()
             continue;
         cnt ++;
         a[cnt] = i;
-        if ((mp[1] & i) == i)
+        if ((mp[1] & i) == i)//初始化：如果找到了一个合法的情况cnt就把dp[1][cnt]置为1
             dp[1][cnt] = 1;
     }
     for (int i = 2; i <= n; i++)
@@ -221,7 +221,7 @@ signed main()
             }
             for (int k = 2; k <= n; k++)
                 if (dp[k - 1][j] != inf && tmp != inf)
-                    dp[k][i] = min(dp[k][i],dp[k - 1][j] + tmp * (k - 1));
+                    dp[k][i] = min(dp[k][i],dp[k - 1][j] + tmp * (k - 1));//dp转移
         }
     }
     int ans = inf;
