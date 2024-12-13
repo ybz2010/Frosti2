@@ -2,7 +2,7 @@
 title: "状压dp学习笔记"
 description: "如题"
 pubDate: "Dec 06 2024"
-image: "/Sigewinne_5.webp"
+image: "/head_pic/Sigewinne_5.webp"
 categories:
   - tech
 tags:
