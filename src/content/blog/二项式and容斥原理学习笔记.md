@@ -28,66 +28,6 @@ $$
 
 ## 二项式反演
 
-### 二项式定理
-
-二项式，就是有两项的多项式。形如：
-
-$$
-a + b 
-$$
-
-很简单吧？现在我们来考虑这个东西：
-
-$$
-(a + b) ^ i
-$$
-
-这十分的让人迷惑对吧？没事，我们先来看看低次的：
-
-$$
-\begin{aligned}
-(a + b) ^ 0 & = 1 \\ 
-(a + b) ^ 1 & = a^1 + b^1 \\
-(a + b) ^ 2 & = a^2 + 2a^1b^1 + b^2 \\
-(a + b) ^ 3 & = a^3 + 3a^2b^1 + 3a^1b^2 + b^3
-\end{aligned}
-$$
-
-似乎有点规律？我们先不管系数，看指数，猛地发现：
-
-$$
-\begin{aligned}
-(a + b)^i & = ?a^i b^0 + ?a^{i - 1}b^1 + ?a^{i - 2}b^2 + \cdots + ?a^0b^i \\
-& = \sum\limits_{j = 0}^{i}?a^j b^{i - j}
-\end{aligned}
-$$
-
-我们再把每一行的每一项系数列出来？
-
-$$
-1 \\
-1 \; 1 \\
-1 \; 2 \; 1 \\
-1 \; 3 \; 3 \; 1
-$$
-
-这不就是杨辉三角吗？而杨辉三角又可以写成这样：
-
-$$
-\binom{0}{0} \\
-\binom{1}{0} \; \binom{1}{1} \\
-\binom{2}{0} \; \binom{2}{1} \; \binom{2}{2} \\
-\binom{3}{0} \; \binom{3}{1} \; \binom{3}{2} \; \binom{3}{3} 
-$$
-
-也就是说：杨辉三角的第 $i$ 行第 $j$ 个数是 $\binom{i}{j}$ 。这里，行和列都是从 $0$ 开始标号的。而回到上面的式子，我们发现，$(a + b)^i$ 的第 $j$ 项的系数是杨辉三角的 第 $i$ 行第 $j$ 个数，也就是 $\binom{i}{j}$。那么，我们便可以写出公式：
-
-$$
-(a + b) ^ i = \sum\limits_{j = 0}^{i}\binom{i}{j}a^j b^{i - j}
-$$
-
-这便是二项式定理了。
-
 ### 反演的定义
 
 现在我们有两个数组：$f$ 和 $g$。而 $g$ 和 $f$ 之间有对应关系：
@@ -126,7 +66,7 @@ $$
 
 $$
 g_{n} = \sum\limits_{i = 0}^{n}(-1)^i\binom{n}{i}f_{i}
-\longleftrightarrow
+\Longleftrightarrow
 f_{n} = \sum\limits_{i = 0}^{n}(-1)^i\binom{n}{i}g_{i}
 $$
 
@@ -134,8 +74,30 @@ $$
 
 $$
 g_{n} = \sum\limits_{i = 0}^{n}\binom{n}{i}f_{i}
-\longleftrightarrow
+\Longleftrightarrow
 f_{n} = \sum\limits_{i = 0}^{n}(-1)^{n - i}\binom{n}{i}g_{i}
 $$
 
-如何证明这个公式是正确的呢？
+如何用数学方法证明这个公式是正确的呢？直接代入就行。  
+将 $g_{n} = \sum\limits_{i = 0}^{n}(-1)^i\binom{n}{i}f_{i}$ 代入：
+
+$$
+\begin{aligned}
+f_{n} & = \sum\limits_{i = 0}^{n}(-1)^i\binom{n}{i}\sum\limits_{j = 0}^{i}(-1)^j\binom{i}{j}f_{j} \\
+& = \sum\limits_{i = 0}^{n}\sum\limits_{j = 0}^{i}(-1)^{i + j}\binom{n}{i}\binom{i}{j}f_{j} \\
+& = \sum\limits_{i = 0}^{n}\sum\limits_{j = 0}^{i}(-1)^{i + j}\binom{n}{j}\binom{n - j}{n - i}f_{j} \\
+& = \sum\limits_{j = 0}^{n}\binom{n}{j}f_{j}\sum\limits_{i = 0}^{n - j}(-1)^i\binom{n - j}{i} \\
+& = \sum\limits_{j = 0}^{n}\binom{n}{j}f_{j}[j = n] \\
+& = f_{n}
+\end{aligned}
+$$
+
+显然成立。当然，这个柿子里还有一些不那么显然的东西
+
+1. $\displaystyle\binom{n}{i}\binom{i}{j} = \binom{n}{j}\binom{n - j}{n - i}$  
+这个可以用数学方法证明，也可组合意义的方法证明，这里主要说明组合意义的证法。  
+求 $|U| = n,|A| = i,b = |j|,B \subseteq A \subseteq U$ 的方案数。这里有两种方法：  
+法一：先在 $U$ 里取 $i$ 个元素构成集合 $A$，方案数为 $\binom{n}{i}$，然后在 $i$ 个元素里再取 $j$ 个元素构成集合 $B$，方案数为 $\binom{i}{j}$，合起来就是 $\binom{n}{i}\binom{i}{j}$  
+法二：先在 $U$ 里取 $j$ 个元素构成集合 $B$，方案数为 $\binom{n}{j}$，再在剩下的 $n - j$ 个元素里取 $i - j$ 个元素，方案数为 $\binom{n - j}{i - j}$，又有 $\binom{n - j}{i - j} = \binom{n - j}{n - i}$，所以方案数就是 $\binom{n}{j}\binom{n - j}{n - i}$。  
+得证。
+2. 
