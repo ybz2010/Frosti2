@@ -137,7 +137,7 @@ $$
 
 推导思路和证明思路来自[__allenge的博客](https://www.cnblogs.com/GDOI2018/p/14491894.html)。
 
-## 例题for暴力容斥
+## 例题 for 暴力容斥
 
 ### [P1450 [HAOI2008] 硬币购物](https://www.luogu.com.cn/problem/P1450)
 
