@@ -137,7 +137,87 @@ $$
 
 推导思路和证明思路来自[__allenge的博客](https://www.cnblogs.com/GDOI2018/p/14491894.html)。
 
-## 例题
+## 例题for暴力容斥
+
+### [P1450 [HAOI2008] 硬币购物](https://www.luogu.com.cn/problem/P1450)
+
+我们先考虑没有限制的情况：$dp_{i}$ 表示没有限制的情况下买价格为 $i$ 的物品的方案数，容易发现这就是一个完全背包，可以在 $\mathcal{O}(val)$ 的复杂度下预处理，其中 $val$ 表示最大价格。然后接下来考虑限制的情况。发现正着考虑不超过限制的情况不太好做，**正难则反**。  
+我们考虑超过限制的情况。超过限制就是第 $i$ 个硬币强制选 $d_{i} + 1$ 个，剩下的依然随便选，那么情况数就是 $dp_{s - (d_{i} + 1) \times c_{i}}$，答案就要减去 $\sum\limits_{i = 1}^{4}dp_{s - (d_{i} + 1) \times c_{i}}$。这是单个硬币超出限制的情况，如果有多个硬币，就得请出我们的容斥原理了。但是，容斥原理的公式要求任意两个集合的交集和并集大小相等，这很明显不相等啊，我们又发现：只有 $4$ 种硬币，那我们直接枚举不就行了吗？无非就是带一个 $16$ 的常数嘛。
+
+核心代码：
+
+```cpp
+int ans = dp[s];//dp是预处理好的完全背包
+for (int k = 1; k < (1 << 4); k++)
+{
+    int tmp = s;
+    for (int i = 0; i < 4; i++)
+        if (k & (1 << i))
+            tmp -= (d[i] + 1) * c[i];
+    if (tmp >= 0)
+        ans += (__builtin_popcount(k) & -1 : 1) * dp[tmp];//容斥
+}
+```
+
+### [P6521 [CEOI2010 day2] pin](https://www.luogu.com.cn/problem/P6521)
+
+发现考虑不同的方案数有点难，**正难则反**。  
+依然先考虑“至少”。我们设 $cnt_i$ 为至少有 $i$ 位相同的方案数。这个可以用哈希求解。我们设哈希函数：
+
+```cpp
+int hsh(char ch){return isdigit(ch) ? ch - '0' : ch - 'a' + 10;}
+int hsh(char ch1,char ch2){return hsh(ch1) * 36 + hsh(ch2);}
+int hsh(char ch1,char ch2,char ch3)
+{return hsh(ch1) * 36 * 36 + hsh(ch2) * 36 + hsh(ch3);}
+```
+
+分别用于求解一个字符，两个字符，三个字符的哈希值。很明显，这个哈希函数生成的哈希值不会超过 $6 \times 10 ^ 4$。那么我们记录 $tmp_{i}$ 表示有多少个字符序列的哈希值是 $i$，然后要求解方案数呢，就相当于求解“在 $tmp_{i}$ 个元素里随便取两个不同元素的方案数”，很明显是 $\frac{tmp_{i} \times (tmp_{i} - 1)}{2}$。最后，我们求得了至少有 $i$ 个元素相同的方案数，因为最多有 $4$ 个元素相同，所以我们直接暴力容斥就行。
+
+code:
+
+```cpp
+for (int x = 1; x <= 4; x++)//一个字符相同的
+{
+    memset(tmp,0,sizeof tmp);
+    for (int i = 1; i <= n; i++)
+        tmp[hsh(s[i][x])] ++;
+    for (int i = 0; i <= 6e4; i++)
+        cnt[1] += (tmp[i] * (tmp[i] - 1)) >> 1;
+}
+for (int x = 1; x <= 4; x++)//两个字符相同
+{
+    for (int y = x + 1; y <= 4; y++)
+    {
+        memset(tmp,0,sizeof tmp);
+        for (int i = 1; i <= n; i++)
+            tmp[hsh(s[i][x],s[i][y])] ++;
+        for (int i = 0; i <= 6e4; i++)
+            cnt[2] += (tmp[i] * (tmp[i] - 1)) >> 1;
+    }
+}
+for (int x = 1; x <= 4; x++)//三个字符相同
+{
+    for (int y = x + 1; y <= 4; y++)
+    {
+        for (int z = y + 1; z <= 4; z++)
+        {
+            memset(tmp,0,sizeof tmp);
+            for (int i = 1; i <= n; i++)
+                tmp[hsh(s[i][x],s[i][y],s[i][z])] ++;
+            for (int i = 0; i <= 6e4; i++)
+                cnt[3] += (tmp[i] * (tmp[i] - 1)) >> 1;
+        }
+    }
+}
+//以下是暴力容斥
+ans[3] = cnt[3];
+ans[2] = cnt[2] - 3 * ans[3];
+ans[1] = cnt[1] - ans[2] * 2 - ans[3] * 3;
+ans[0] = ((n * (n - 1)) >> 1) - ans[1] - ans[2] - ans[3];
+printf("%lld",ans[4 - d]);//由于求解的是相同的，所以不同的就是4 - d个
+```
+
+## 例题 for 二项式反演
 
 ### [P10986 [蓝桥杯 2023 国 Python A] 2023](https://www.luogu.com.cn/problem/P10986)
 
@@ -187,26 +267,6 @@ $$
 
 我们就得到了 $g_{k}$。时间复杂度 $\mathcal{O}(n)$。
 
-### [P1450 [HAOI2008] 硬币购物](https://www.luogu.com.cn/problem/P1450)
-
-我们先考虑没有限制的情况：$dp_{i}$ 表示没有限制的情况下买价格为 $i$ 的物品的方案数，容易发现这就是一个完全背包，可以在 $\mathcal{O}(val)$ 的复杂度下预处理，其中 $val$ 表示最大价格。然后接下来考虑限制的情况。发现正着考虑不超过限制的情况不太好做，**正难则反**。  
-我们考虑超过限制的情况。超过限制就是第 $i$ 个硬币强制选 $d_{i} + 1$ 个，剩下的依然随便选，那么情况数就是 $dp_{s - (d_{i} + 1) \times c_{i}}$，答案就要减去 $\sum\limits_{i = 1}^{4}dp_{s - (d_{i} + 1) \times c_{i}}$。这是单个硬币超出限制的情况，如果有多个硬币，就得请出我们的容斥原理了。但是，容斥原理的公式要求任意两个集合的交集和并集大小相等，这很明显不相等啊，我们又发现：只有 $4$ 种硬币，那我们直接枚举不就行了吗？无非就是带一个 $16$ 的常数嘛。
-
-核心代码：
-
-```cpp
-int ans = dp[s];//dp是预处理好的完全背包
-for (int k = 1; k < (1 << 4); k++)
-{
-    int tmp = s;
-    for (int i = 0; i < 4; i++)
-        if (k & (1 << i))
-            tmp -= (d[i] + 1) * c[i];
-    if (tmp >= 0)
-        ans += (__builtin_popcount(k) & -1 : 1) * dp[tmp];//容斥
-}
-```
-
 ### [P5505 [JSOI2011] 分特产](https://www.luogu.com.cn/problem/P5505)
 
 首先设 $f_{i}$ 表示至少有 $i$ 个同学没有拿到特产的方案数，那么有：
@@ -225,7 +285,7 @@ $$
 
 而我们要让每一个人都拿到，答案就是 $g_{0}$。这样，我们就做完了。时间复杂度 $\mathcal{O}(n)$
 
-### [P10597 BZOJ4665 小 w 的喜糖](https://www.luogu.com.cn/problem/P10597)
+### [BZOJ4665 小 w 的喜糖](https://www.luogu.com.cn/problem/P10597)
 
 依然是正难则反+二项式反演 ~~演都不带演~~
 
@@ -265,3 +325,9 @@ int ans = 0;
 for (int i = 0; i <= n; i++)
     ans = ((ans + (i & 1 ? -1 : 1) * dp[m][i]) % mod + mod) % mod;
 ```
+
+## 好题推荐
+
+[P4448 [AHOI2018初中组] 球球的排列](https://www.luogu.com.cn/problem/P4448)  
+[P3158 [CQOI2011] 放棋子](https://www.luogu.com.cn/problem/P3158)  
+[P3160 [CQOI2012] 局部极小值](https://www.luogu.com.cn/problem/P3160)
