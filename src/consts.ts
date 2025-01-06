@@ -3,13 +3,13 @@
 
 // Site title and description
 export const SITE_LANG = "zh";
-export const SITE_TAB = "__dragon_的小站";
-export const SITE_TITLE = "__dragon_的小站";
-export const SITE_DESCRIPTION = "__dragon_的小站";
+export const SITE_TAB = "伊埃斯的小站";
+export const SITE_TITLE = "伊埃斯的小站";
+export const SITE_DESCRIPTION = "伊埃斯的小站";
 export const DATE_FORMAT = "ddd MMM DD YYYY";
 
 // User profile information
-export const USER_NAME = "__dragon_";
+export const USER_NAME = "Eous";
 export const USER_SITE = "https://sigewinne.us"
 export const USER_AVATAR = "/profile_1.webp";
 
