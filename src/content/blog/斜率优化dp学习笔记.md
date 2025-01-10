@@ -159,7 +159,7 @@ y_{i} & = dp_{i} - w_{i - 1} - h_{i}^{2}
 \end{aligned}
 $$
 
-具体来说，就是把方程从 $b = y - kx$ 变成 $y = kx + b$，经过移项得到 $dp_{i} = kx + b + \text{something}$。这里的 $\text{something}$ 通常是固定的，所以我们可得 $kx + b$ 最小的是最优决策。那么我们就可以用李超线段树维护。
+具体来说，就是把方程从 $b = y - kx$ 变成 $y = kx + b$，经过移项得到 $dp_{i} = kx + b + \text{something}$。这里的 $\text{something}$ 通常是固定的，所以我们可得 $kx + b$ 最小的是最优决策。那么我们就可以用李超线段树维护线段，查询横坐标为 $x_{i}$ 时最小的纵坐标。
 
 放一下代码：
 
@@ -199,7 +199,7 @@ void upd(line ln,int l,int r,int &rt)
         tree[rt].fl = 1;
         return;
     }
-    else if (lque <= lpos && rque <= rpos)//新线段完全在原线段下
+    else if (lque <= lpos && rque <= rpos)
         tree[rt].ln = ln;
     else if (lque < lpos || rque < rpos)
     {
@@ -238,11 +238,11 @@ signed main()
         scanf("%lld",w + i);
         w[i] += w[i - 1];
     }
-    upd(line(k(1),b(1)),0,2e6,rt);
+    upd(line(k(1),b(1)),0,2e6,rt);//初始状态为dp[1]
     for (int i = 2; i <= n; i++)
     {
-        dp[i] = que(x(i),0,2e6,rt) + w[i - 1] + sq(h[i]);
-        upd(line(k(i),b(i)),0,2e6,rt);
+        dp[i] = que(x(i),0,2e6,rt) + w[i - 1] + sq(h[i]);//查询最小纵坐标
+        upd(line(k(i),b(i)),0,2e6,rt);//加入线段树
     }
     printf("%lld",dp[n]);
     return 0;
