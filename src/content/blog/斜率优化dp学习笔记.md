@@ -1,7 +1,7 @@
 ---
 title: "斜率优化dp学习笔记"
 description: "如题"
-pubDate: "Nov 22 2024"
+pubDate: "Jan 10 2025"
 image: "/head_pic/Nahida_3.webp"
 categories:
   - tech
@@ -21,7 +21,7 @@ $$
 
 因为有 $a_{i}b_{j}$ 这样的与 $i$ 和 $j$ 都有关的恶心项，所以不能用单调队列优化。
 
-先来一道例题：[P3195 \[HNOI2008\] 玩具装箱](https://www.luogu.com.cn/problem/P3195)
+### 例题1：[P3195 \[HNOI2008\] 玩具装箱](https://www.luogu.com.cn/problem/P3195)
 
 既然叫斜率**优化** dp，那么我们肯定得先把朴素的 dp 方程写出来。设 $dp_{i}$ 为前 $i$ 个玩具都塞进去了的最小代价，并维护前缀和 $sum_{i} = \sum\limits_{j = 1}^{i}C_{i} + 1$，那么有朴素的 dp 方程：
 
@@ -48,8 +48,8 @@ $$
 $$
 \begin{aligned}
 x_{j} & = sum_{j} \\
-y_{j} & = dp_{j} + (sum_{j} + L)^{2} \\
 k_{i} & = 2sum_{i} \\
+y_{j} & = dp_{j} + (sum_{j} + L)^{2} \\
 b_{i} & = dp_{i} - (sum_{i}^{2} + 2sum_{i}L)
 \end{aligned}
 $$
@@ -62,7 +62,7 @@ $$
 
 想象这条绿色的线在一直向上移动，它碰到的第一个点就是最优决策点。用盯真法，这里就是 $P_{1}$。但是程序不会盯真，所以我们还得想想怎么让程序也会找最优点。很显然，最优点一定在下凸壳（有些是上凸壳）上。于是我们可以用单调栈维护一个凸壳。但是凸壳有了，那凸壳上还有那么多点啊，到底是哪一个呢？
 
-在这幅图里，很显然是最低点 $P_{1}$，那会不会有其他的情况呢，是有的。就比如我们把这条线的斜率加大一点：
+在这幅图里，很显然是最低点 $P_{1}$，那会不会有其他的情况呢，比如我们把这条线的斜率加大一点：
 
 ![](https://cdn.luogu.com.cn/upload/image_hosting/g2961kqd.png)
 
@@ -111,4 +111,140 @@ signed main()
 }
 ```
 
-你肯定注意到了“有些题”和这个题不一样，至于为什么不一样呢？因为有些题的 $k_{i}$ 是单减的，所以是上凸壳，有些甚至没有单调性，那么我们就要用平衡树或者李超线段树来维护了。
+你肯定注意到了“有些题”和这个题不一样，至于为什么不一样呢？因为有些题的 $k_{i}$ 是单减的，所以是上凸壳，有些甚至没有单调性，那么我们就要用平衡树或者李超线段树来维护了。单调队列和单调栈只能用于维护横坐标和斜率都单调的题。
+
+### 例题2：[P4655 [CEOI2017] Building Bridges](https://www.luogu.com.cn/problem/P4655)
+
+这道题的斜率和横坐标就不单调了。
+
+依旧是先列出朴素的方程：
+
+$$
+dp_{i} = \min\{dp_{j} + w_{i - 1} - w_{j} + (h_{i} - h_{j})^{2}\}
+$$
+
+其中 $w$ 是预处理好的前缀和。
+
+接下来我们把它化简，并写出 $k,b,x,y$：
+
+$$
+\begin{aligned}
+dp_{i} & = \min\{dp_{j} + w_{i - 1} - w_{j} + h_{i}^{2} + h_{j}^{2} - 2h_{i}h_{j} \} \\
+& = w_{i - 1} + h_{i}^{2} + \min\{dp_{j} - w_{j} + h_{j}^{2} - 2h_{i}h_{j} \}
+\end{aligned}
+$$
+
+写出 $k,b,x,y$：
+
+$$
+
+\begin{aligned}
+k_{i} & = 2h_{i} \\
+x_{j} & = h_{j} \\
+b_{i} & = dp_{i} - w_{i - 1} - h_{i}^{2} \\
+y_{j} & = dp_{j} - w_{j} + h_{j}^{2}
+\end{aligned}
+$$
+
+但是我们发现：$x$ 和 $k$ 现在都不单调了，所以单调栈和单调队列立即发生爆炸。这时，我们就得请出[李超线段树](https://oi-wiki.org/ds/li-chao-tree/)了。
+
+板子这里就不说了。如果用李超线段树的话，$k,x,b,y$ 略有不同：
+
+$$
+\begin{aligned}
+k_{j} & = -2h_{j} \\
+x_{i} & = h_{i} \\
+b_{j} & = dp_{j} - w_{j} + h_{j}^{2} \\
+y_{i} & = dp_{i} - w_{i - 1} - h_{i}^{2}
+\end{aligned}
+$$
+
+具体来说，就是把方程从 $b = y - kx$ 变成 $y = kx + b$，经过移项得到 $dp_{i} = kx + b + \text{something}$。这里的 $\text{something}$ 通常是固定的，所以我们可得 $kx + b$ 最小的是最优决策。那么我们就可以用李超线段树维护。
+
+放一下代码：
+
+```cpp
+#include<bits/extc++.h>
+#define int long long
+#define sq(x) ((x) * (x))
+#define inf 0x3f3f3f3f3f3f3f3f
+using namespace std;
+const int maxn = 1e5 + 5;
+int n,cnt,rt;
+int h[maxn],w[maxn],dp[maxn];
+int k(int j){return -2 * h[j];}
+int x(int i){return h[i];}
+int b(int j){return dp[j] - w[j] + sq(h[j]);}
+struct line
+{
+    int k,b;
+    line(int k = 0,int b = 0):k(k),b(b){};
+    int f(int x){return k * x + b;}
+};
+struct Nahida
+{
+    int ls,rs;
+    line ln;
+    bool fl;
+}tree[maxn << 2];
+void upd(line ln,int l,int r,int &rt)
+{
+    if (!rt)
+        rt = ++cnt;
+    int lpos = tree[rt].ln.f(l),rpos = tree[rt].ln.f(r);
+    int lque = ln.f(l),rque = ln.f(r);
+    if (!tree[rt].fl)
+    {
+        tree[rt].ln = ln;
+        tree[rt].fl = 1;
+        return;
+    }
+    else if (lque <= lpos && rque <= rpos)//新线段完全在原线段下
+        tree[rt].ln = ln;
+    else if (lque < lpos || rque < rpos)
+    {
+        int mid = (l + r) >> 1;
+        if (ln.f(mid) < tree[rt].ln.f(mid))
+            swap(ln,tree[rt].ln);
+        if (ln.f(l) < tree[rt].ln.f(l))
+            upd(ln,l,mid,tree[rt].ls);
+        else
+            upd(ln,mid + 1,r,tree[rt].rs);
+    }
+}
+int que(int pos,int l,int r,int rt)
+{
+    if (!rt)
+        return inf;
+    int ret = tree[rt].ln.f(pos);
+    if (l == r)
+        return ret;
+    int mid = (l + r) >> 1;
+    int tmp;
+    if (pos <= mid)
+        tmp = que(pos,l,mid,tree[rt].ls);
+    else
+        tmp = que(pos,mid + 1,r,tree[rt].rs);
+    ret = min(ret,tmp);
+    return ret;
+}
+signed main()
+{
+    scanf("%lld",&n);
+    for (int i = 1; i <= n; i++)
+        scanf("%lld",h + i);
+    for (int i = 1; i <= n; i++)
+    {
+        scanf("%lld",w + i);
+        w[i] += w[i - 1];
+    }
+    upd(line(k(1),b(1)),0,2e6,rt);
+    for (int i = 2; i <= n; i++)
+    {
+        dp[i] = que(x(i),0,2e6,rt) + w[i - 1] + sq(h[i]);
+        upd(line(k(i),b(i)),0,2e6,rt);
+    }
+    printf("%lld",dp[n]);
+    return 0;
+}
+```
