@@ -125,7 +125,7 @@ $$
 
 其中 $w$ 是预处理好的前缀和。
 
-接下来我们把它化简，并写出 $k,b,x,y$：
+接下来我们把它化简，并写出 $l,b,x,y$：
 
 $$
 \begin{aligned}
@@ -134,7 +134,7 @@ dp_{i} & = \min\{dp_{j} + w_{i - 1} - w_{j} + h_{i}^{2} + h_{j}^{2} - 2h_{i}h_{j
 \end{aligned}
 $$
 
-写出 $k,b,x,y$：
+写出 $l,b,x,y$：
 
 $$
 
@@ -148,7 +148,7 @@ $$
 
 但是我们发现：$x$ 和 $k$ 现在都不单调了，所以单调栈和单调队列立即发生爆炸。这时，我们就得请出[李超线段树](https://oi-wiki.org/ds/li-chao-tree/)了。
 
-板子这里就不说了。如果用李超线段树的话，$k,x,b,y$ 略有不同：
+板子这里就不说了。如果用李超线段树的话，$l,x,b,y$ 略有不同：
 
 $$
 \begin{aligned}
@@ -177,7 +177,7 @@ int x(int i){return h[i];}
 int b(int j){return dp[j] - w[j] + sq(h[j]);}
 struct line
 {
-    int k,b;
+    int l,b;
     line(int k = 0,int b = 0):k(k),b(b){};
     int f(int x){return k * x + b;}
 };
@@ -245,6 +245,120 @@ signed main()
         upd(line(k(i),b(i)),0,2e6,rt);//加入线段树
     }
     printf("%lld",dp[n]);
+    return 0;
+}
+```
+
+### 例题3：[P4072 [SDOI2016] 征途](https://www.luogu.com.cn/problem/P4072)
+
+这题比较特殊，他的 dp 方程是二维的。我们还是先把朴素的方程写出来。设 $dp_{i,j}$ 表示到第 $i$ 走完 $i$ 条路用了 $j$ 天的最小方差。那么有：
+
+$$
+dp_{i,j} = \min\{dp_{l,j - 1} + \text{这段的贡献} \}
+$$
+
+那么问题就在于如何求贡献，我们先把方差的式子列出来：
+
+$$
+v = \frac{\sum\limits_{i = 1}^{m}(len_{i} - \frac{sum}{m})^{2}}{m}
+$$
+
+其中 $len_{i}$ 表示第 $i$ 天走的距离，$sum$ 表示到目的地的总距离。
+
+现在按照题意，把 $v$ 乘上一个 $m^{2}$：
+
+$$
+\begin{aligned}
+v \times m^{2} & = \frac{\sum\limits_{i = 1}^{m}(len_{i} - \frac{sum}{m})^{2}}{m} \times m^{2} \\
+& = m \times \sum\limits_{i = 1}^{m}(len_{i} - \frac{sum}{m})^{2} \\
+& = m \times \sum\limits_{i = 1}^{m}(len_{i}^{2} + \frac{sum^{2}}{m^{2}} - 2 \times len_{i} \times \frac{sum}{m}) \\
+& = \sum\limits_{i = 1}^{m}(m \times len_{i}^{2} + \frac{sum^{2}}{m} - 2 \times len_{i} \times sum) \\
+& = sum^{2} + \sum\limits_{i = 1}^{m}(m \times len_{i}^{2} - 2 \times len_{i} \times sum)
+\end{aligned}
+$$
+
+那现在我们就知道每一段的贡献是 $m \times len_{i}^{2} - 2m \times len_{i} \times sum$。如此，我们的答案就是 $dp_{n,m} + sum^{2}$。记录 $dis$ 为距离的前缀和，用 $dis$ 里的数替换 $len_{i}$ 和 $sum$，并把完整的 dp 方程写出来：
+
+$$
+dp_{i,j} = \min\{dp_{l,j - 1} + m(dis_{i} - dis_{l})^{2} - 2 \times (dis_{i} - dis_{l}) \times dis_{n} \}
+$$
+
+接下来，我们尝试将它化简：
+
+$$
+\begin{aligned}
+dp_{i,j} & = \min\{dp_{l,j - 1} + m(dis_{i} - dis_{l})^{2} - 2 \times (dis_{i} - dis_{l}) \times dis_{n} \} \\
+& = \min\{dp_{l,j - 1} + m(dis_{i}^{2} + dis_{l}^{2} - 2dis_{i}dis_{l}) - 2dis_{i}dis_{n} + 2dis_{l}dis_{n} \} \\
+& = \min\{dp_{l,j - 1} + m \times dis_{i}^{2} + m \times dis_{l}^{2} - 2m \times dis_{i}dis_{l} - 2dis_{i}dis_{n} + 2dis_{l}dis_{n} \} \\
+& = m \times dis_{i}^{2} - 2dis_{i}dis_{n} + \min\{dp_{l,j - 1} + m \times dis_{l}^{2} - 2m \times dis_{i}dis_{l} + 2dis_{l}dis_{n} \}
+\end{aligned}
+$$
+
+并尝试写出单调队列形式的 $k,x,b,y$：
+
+$$
+\begin{aligned}
+k & = 2m \times dis_{i} \\
+x & = dis_{l} \\
+b & = dp_{i,j} - (m \times dis_{i}^{2} - 2dis_{i}dis_{n}) \\
+y & = dp_{l,j - 1} + m \times dis_{l}^{2} + 2dis_{l}dis_{n}
+\end{aligned}
+$$
+
+我们发现他的斜率单调递增，可以用单调队列来维护。那具体怎么做呢？我们最外层枚举 $j$，对于每一个 $j$ 对应的那一层，我们单独用一个单调队列维护，每层转移开始时清空并重新扔一个新的起始状态进去。
+
+> 为什么要每层都用一个单独的单调队列？
+
+> 因为每一层都是独立的，相当于重新开始了一次 dp。
+
+更多细节会在代码里说明：
+
+```cpp
+#include<bits/extc++.h>
+#define int long long
+#define sq(x) ((x) * (x))
+using namespace std;
+typedef long double ld;
+const int maxn = 3005;
+int n,m;
+int dis[maxn];
+int dp[maxn][maxn];
+int q[maxn],head,tail;
+
+//上文里的三哥俩
+int k(int i){return 2 * m * dis[i];}
+int x(int k){return dis[k];}
+int y(int k,int j){return dp[k][j - 1] + m * sq(dis[k]) + 2 * dis[k] * dis[n];}
+
+ld slope(int i,int k,int j){return ((ld)y(k,j) - (ld)y(i,j)) / ((ld)x(k) - (ld)x(i));}
+signed main()
+{
+    scanf("%lld%lld",&n,&m);
+    for (int i = 1; i <= n; i++)
+    {
+        scanf("%lld",dis + i);
+        dis[i] += dis[i - 1];
+    }
+    memset(dp,0x3f,sizeof dp);
+    dp[0][0] = 0;
+    for (int j = 1; j <= m; j++)
+    {
+        //重中之重
+        head = tail = 1;
+        q[1] = j - 1;
+        //因为前 j - 1 天至多走 j - 1 条路，所以初始的就是 j - 1
+        for (int i = j; i <= n; i++)
+        {
+            while (tail > head && slope(q[head],q[head + 1],j) < k(i))
+                head++;//维护凸壳
+            int k = q[head];//本来以为会和上面的k(i)冲突的，但是实际上没有
+            dp[i][j] = dp[k][j - 1] + m * sq(dis[i] - dis[k]) - 2 * (dis[i] - dis[k]) * dis[n];
+            while (tail > head && slope(q[tail - 1],q[tail],j) > slope(q[tail],i,j))
+                tail--;//加入队列
+            q[++tail] = i;
+        }
+    }
+    printf("%lld",dp[n][m] + sq(dis[n]));//输出答案
     return 0;
 }
 ```
