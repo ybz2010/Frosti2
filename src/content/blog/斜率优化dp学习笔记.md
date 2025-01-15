@@ -362,3 +362,40 @@ signed main()
     return 0;
 }
 ```
+
+### 例题4：[P5308 [COCI2018-2019#4] Akvizna](https://www.luogu.com.cn/problem/P5308)
+
+这题要用一个叫 wqs 二分的东西。
+
+依然先写出来朴素的 dp 方程。设 $dp_{k,i}$ 表示在前 $k$ 轮总共干了 $i$ 个人，那么有转移：
+
+$$
+dp_{k,i} = \max\{dp_{k - 1,j} + \frac{i - j}{n - j} \}
+$$
+
+然后化简：
+
+$$
+\begin{aligned}
+dp_{k,i} & = \max\{dp_{k - 1,j} + \frac{i - j}{n - j} \} \\
+& = \max\{dp_{k - 1,j} + \frac{i}{n - j} - \frac{j}{n - j} \} \\
+& = \max\{dp_{k - 1,j} - \frac{j}{n - j} + i \times \frac{1}{n - j} \}
+\end{aligned}
+$$
+
+写出 $k,x,b,y$
+
+$$
+\begin{aligned}
+k & = -i \\
+x & = \frac{1}{n - j} \\
+b & = dp_{k,i} \\
+y & = dp_{k - 1,j} - \frac{j}{n - j}
+\end{aligned}
+$$
+
+然后看到 $k$ 和 $x$ 都单调，兴致勃勃的开始斜率优化。**蛋柿**，我们发现优化完了还是有 $\mathcal{O}(nk)$ 的复杂度，立即发生爆炸。这时候，就得请我们的 wqs 二分登场了。
+
+wqs 二分通常用于求解“正好取 $k$ 组”的问题，能用它求解的问题通常还有一个特点：如果没有正好取 $k$ 的要求可以变成一维 dp。我们看，这道题正好满足条件。但是，wqs 二分还有一个要求，就是：设 $\operatorname{f}(k)$ 为正好取 $k$ 组的最优解，那么 $\operatorname{f}$ 是 $k$ 的凸函数（上凸下凸都可以）。证明的话，打表就可以。我们把每一个横坐标为整数 $k$，纵坐标为 $\operatorname{f}(k)$ 的每一个点都画出来：
+
+![](https://sigewinne.us/pic_in_blog/wqs1.png)
