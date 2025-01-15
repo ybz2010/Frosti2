@@ -398,4 +398,8 @@ $$
 
 wqs 二分通常用于求解“正好取 $k$ 组”的问题，能用它求解的问题通常还有一个特点：如果没有正好取 $k$ 的要求可以变成一维 dp。我们看，这道题正好满足条件。但是，wqs 二分还有一个要求，就是：设 $\operatorname{f}(k)$ 为正好取 $k$ 组的最优解，那么 $\operatorname{f}$ 是 $k$ 的凸函数（上凸下凸都可以）。证明的话，打表就可以。我们把每一个横坐标为整数 $k$，纵坐标为 $\operatorname{f}(k)$ 的每一个点都画出来：
 
-![](https://sigewinne.us/pic_in_blog/wqs1.png)
+![](https://sigewinne.us/pic_in_blog/斜率优化dp学习笔记/wqs1.png)
+
+因为凸壳的斜率具有单调性，所以我们尝试二分斜率。用二分到的斜率 $p$ 去切这个凸壳：
+
+![](https://sigewinne.us/pic_in_blog/斜率优化dp学习笔记/wqs2.png)
