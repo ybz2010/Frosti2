@@ -9,7 +9,7 @@ tags:
   - 学习笔记
 ---
 
-这玩意甚至比二项式反演还难。
+本人太弱，如果讲的不好，请见谅。
 
 ## 引入
 
@@ -19,9 +19,11 @@ $$
 dp_{i} = \min\{dp_{j} + a_{i}b_{j} + c_{i} + d_{j}\}
 $$
 
-因为有 $a_{i}b_{j}$ 这样的与 $i$ 和 $j$ 都有关的恶心项，所以不能用单调队列优化。
+因为有 $a_{i}b_{j}$ 这样的与 $i$ 和 $j$ 都有关的恶心项，所以不能用单调队列优化（虽然斜率优化有些时候也得用单调队列）。
 
-### 例题1：[P3195 \[HNOI2008\] 玩具装箱](https://www.luogu.com.cn/problem/P3195)
+## 例题
+
+### 例题 1：[P3195 \[HNOI2008\] 玩具装箱](https://www.luogu.com.cn/problem/P3195)
 
 既然叫斜率**优化** dp，那么我们肯定得先把朴素的 dp 方程写出来。设 $dp_{i}$ 为前 $i$ 个玩具都塞进去了的最小代价，并维护前缀和 $sum_{i} = \sum\limits_{j = 1}^{i}C_{i} + 1$，那么有朴素的 dp 方程：
 
@@ -111,9 +113,9 @@ signed main()
 }
 ```
 
-你肯定注意到了“有些题”和这个题不一样，至于为什么不一样呢？因为有些题的 $k_{i}$ 是单减的，所以是上凸壳，有些甚至没有单调性，那么我们就要用平衡树或者李超线段树来维护了。单调队列和单调栈只能用于维护横坐标和斜率都单调的题。
+你肯定注意到了“有些题”和这个题不一样，至于为什么不一样呢？因为有些题的 $k_{i}$ 是单减的，所以是上凸壳，有些甚至没有单调性，那么我们就要用平衡树或者李超线段树来维护了。单调队列和单调栈只能用于维护横坐标和斜率都单调的方程。
 
-### 例题2：[P4655 [CEOI2017] Building Bridges](https://www.luogu.com.cn/problem/P4655)
+### 例题 2：[P4655 \[CEOI2017\] Building Bridges](https://www.luogu.com.cn/problem/P4655)
 
 这道题的斜率和横坐标就不单调了。
 
@@ -137,7 +139,6 @@ $$
 写出 $l,b,x,y$：
 
 $$
-
 \begin{aligned}
 k_{i} & = 2h_{i} \\
 x_{j} & = h_{j} \\
@@ -249,7 +250,7 @@ signed main()
 }
 ```
 
-### 例题3：[P4072 [SDOI2016] 征途](https://www.luogu.com.cn/problem/P4072)
+### 例题 3：[P4072 \[SDOI2016\] 征途](https://www.luogu.com.cn/problem/P4072)
 
 这题比较特殊，他的 dp 方程是二维的。我们还是先把朴素的方程写出来。设 $dp_{i,j}$ 表示到第 $i$ 走完 $i$ 条路用了 $j$ 天的最小方差。那么有：
 
@@ -363,7 +364,7 @@ signed main()
 }
 ```
 
-### 例题4：[P5308 [COCI2018-2019#4] Akvizna](https://www.luogu.com.cn/problem/P5308)
+### 例题 4：[P5308 \[COCI2018-2019#4\] Akvizna](https://www.luogu.com.cn/problem/P5308)
 
 这题要用一个叫 wqs 二分的东西。
 
@@ -403,3 +404,70 @@ wqs 二分通常用于求解“正好取 $k$ 组”的问题，能用它求解�
 因为凸壳的斜率具有单调性，所以我们尝试二分斜率。用二分到的斜率 $p$ 去切这个凸壳：
 
 ![](https://sigewinne.us/pic_in_blog/斜率优化dp学习笔记/wqs2.png)
+
+这时的截距就是 $ans - p \times k$（这里的 $k$ 是横坐标）。因为会有 $k$ 次转移，所以我们在转移的时候，每次减去斜率 $p$，最终就会得到 $k$ 时截距 $b$，也就对应 $ans$ 最大值。并计算转移次数（或者叫分了几段）。因为斜率越大，切点越高，横坐标也就越大，分的段数也就越多，所以我们在 `check` 里面打斜率优化 dp，如果转移次数（分的段数）大于 $k$，那么就说明斜率太小了（结合图片理解），反之就是斜率太大了。
+
+看看代码也许更加懂一些？
+
+```cpp
+#include<bits/extc++.h>
+using namespace std;
+typedef long double ld;
+const int maxn = 1e5 + 5;
+const ld eps = 1e-15;
+int tot,n;//这里的 tot 是题目中的 k
+int q[maxn],head,tail;
+ld dp[maxn],g[maxn];
+inline ld x(int i){return (ld)1 / ld(n - i);}
+inline ld y(int i){return (ld)dp[i] - (ld)i / ld(n - i);}
+inline ld k(int i){return (ld)-i;}
+inline ld slope(int i,int j){return (y(j) - y(i)) / (x(j) - x(i));}
+bool check(ld mid)
+{
+    q[head = tail = 1] = 0;
+    for (int i = 1; i <= n; i++)//check 里的斜率优化
+    {
+        while (head < tail && slope(q[head],q[head + 1]) - k(i) > -eps)//维护凸壳
+            head++;
+        int j = q[head];
+        dp[i] = dp[j] + ld(i - j) / ld(n - j) - mid;
+        g[i] = g[j] + 1;//记录转移次数（分的段数）
+        while (head < tail && slope(q[tail],i) - slope(q[tail - 1],q[tail]) > -eps)
+            tail--;
+        q[++tail] = i;
+    }
+    return g[n] >= tot;//如果分的段数大于k，那么就说明斜率太小了。
+}
+int main()
+{
+    scanf("%d%d",&n,&tot);
+    ld l = 0,r = 2e6,mid;
+    while (r - l > eps && (ld)clock() / (ld)CLOCKS_PER_SEC < 0.9)
+    {
+        mid = (l + r) / (ld)2;
+        if (check(mid))
+            l = mid + eps;//斜率太小就加
+        else
+            r = mid - eps;//太大就减
+    }
+    check(l);
+    printf("%.9Lf",dp[n] + 1.0 * l * tot);
+    return 0;
+}
+```
+
+## 总结
+
+1. 先将 dp 方程化简，尝试写单调队列形式的 $b = y - kx$：只与 $i$ 有关的项是 $b$，只与 $j$ 有关的项是 $y$，与 $i,j$ 都有关的项，分成两半：只与 $i$ 有关是 $k$，只与 $j$ 有关的是 $x$。
+2. 判断单调性。如果 $k,x$ 有一个不是单调的，那么就不能用单调队列维护凸包，推荐使用李超线段树，因为李超线段树不用任何单调性，而平衡树和 cdq 分治都有单调性的要求，时间复杂度也就多一个 $\log n$。
+3. 如果使用单调队列，那么队首就是最优决策点，用方程转移即可。
+4. 如果使用李超线段树，那么需要将 $k$ 和 $x$ 交换，$b$ 和 $y$ 交换，变成 $y = kx + b$，$x$ 与 $i$ 有关，$b$ 与 $j$ 有关。转移时，用李超线段树查询 $i$ 对应的 $x$ 的纵坐标的最小（最大值），也就是查询 $x = x_{i}$ 这条线与哪条插入的线段的交点纵坐标最大，为多少。那么查出来的最小（大）纵坐标就对应最优的决策值（$y = kx + b$），转移即可。
+
+## 好题推荐
+
+[P3628 \[APIO2010\] 特别行动队](https://www.luogu.com.cn/problem/P3628)\
+[P5785 \[SDOI2012\] 任务安排](https://www.luogu.com.cn/problem/P5785)\
+[P2120 \[ZJOI2007\] 仓库建设](https://www.luogu.com.cn/problem/P2120)\
+[P4360 \[CEOI2004\] 锯木厂选址](https://www.luogu.com.cn/problem/P4360)
+
+如果有不严谨的地方，欢迎指出。
